@@ -25,15 +25,45 @@ function checksCreateTodosUserAvailability(request, response, next) {
   if (user.pro === false && user.todos.length < 10) {
     return next();
   }
+
+  if (user.pro === true) {
+    return next();
+  }
   return response.status(403);
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  if (!validate(id)) {
+    return response.status(400);
+  }
+
+  const user = users.find((user) => user.username === username);
+  if (!user) {
+    return response.status(404);
+  }
+  const todo = user.todos.find((todoItem) => todoItem.id === id);
+
+  if (!todo) {
+    return response.status(404);
+  }
+
+  request.user = user;
+  request.todo = todo;
+  return next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+
+  const user = users.find((user) => user.id === id);
+  if (!user) {
+    return response.status(404);
+  }
+  request.user = user;
+  return next();
 }
 
 app.post("/users", (request, response) => {
