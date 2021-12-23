@@ -26,30 +26,30 @@ function checksCreateTodosUserAvailability(request, response, next) {
     return next();
   }
 
-  if (user.pro === true) {
-    return next();
+  if (user.pro === false && user.todos.length >= 10) {
+    return response.status(403);
   }
-  return response.status(403);
+  return next();
 }
 
 function checksTodoExists(request, response, next) {
   const { username } = request.headers;
   const { id } = request.params;
 
-  if (!validate(id)) {
-    return response.status(400);
-  }
-
   const user = users.find((user) => user.username === username);
   if (!user) {
     return response.status(404);
   }
-  const todo = user.todos.find((todoItem) => todoItem.id === id);
 
-  if (!todo) {
-    return response.status(404);
+  if (!validate(id)) {
+    return response.status(400);
   }
 
+  const todo = user.todos.find((todoItem) => todoItem.id === id);
+  if (!todo) {
+    return response.status(404).json({ error: "Todo not found" });
+  }
+  console.log("cheguei aqui", !todo);
   request.user = user;
   request.todo = todo;
   return next();
